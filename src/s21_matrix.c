@@ -1,50 +1,50 @@
 #include "s21_matrix.h"
 
-int main() {
-    matrix_t s21_matrix;
-    matrix_t s21_matrix_2;
-    s21_create_matrix(3, 4, &s21_matrix);
-    s21_create_matrix(3, 4, &s21_matrix_2);
-    s21_fill_matrix(&s21_matrix, 1.1234567);
-    s21_print_matrix(s21_matrix);
-    
-    s21_fill_matrix(&s21_matrix_2, 1.1234567);
-    s21_print_matrix(s21_matrix_2);
-    // if (s21_eq_matrix(&s21_matrix, &s21_matrix_2) == SUCCESS) {
-    //     printf("equal\n");
-    // } else {
-    //     printf("not equal\n ");
-    // }
-    // printf("%d\n", matrix.rows);
-    // printf("%d\n", matrix.columns);
-    s21_remove_matrix(&s21_matrix);
-    s21_remove_matrix(&s21_matrix_2);
-}
+// void s21_print_matrix(matrix_t A) {
+//     for (int row = 0; row < A.rows; row++) {
+//         for (int column = 0; column < A.columns; column++) {
+//             printf("%.10lf ", A.matrix[row][column]);
+//         }
+//         printf("\n");
+//     }
+// }
 
-void s21_print_matrix(matrix_t A) {
-    for (int row = 0; row < A.rows; row++) {
-        for (int column = 0; column < A.columns; column++) {
-            printf("%.10lf ", A.matrix[row][column]);
-        }
-        printf("\n");
-    }
+void matrix_struct_init(matrix_t *A) {
+    A->rows = 0;
+    A->columns = 0;
+    A->matrix = NULL;
 }
 
 void s21_fill_matrix(matrix_t *A, double value) {
     for (int row = 0; row < A->rows; row++) {
         for (int column = 0; column < A->columns; column++) {
-            A->matrix[row][column] = value; 
+            A->matrix[row][column] = value;
         }
     }
 }
 
+int incorrect_matrix(matrix_t *A) {
+    int status = 0;
+    if (A->rows <= 0 || A->columns <= 0 || A->matrix == NULL) {
+        status = 1;
+    }
+    return status;
+}
+
+int equal_matrix_size(matrix_t *A, matrix_t *B) {
+    int status = 0;
+    if (A->rows == B->rows && A->columns == B->columns) {
+        status = 1;
+    }
+    return status;
+}
+
 int s21_create_matrix(int rows, int columns, matrix_t *result) {
-    int status = SUCCESS;
+    int status = 0;
     if (rows <= 0 && columns <= 0) {
-        status = FAILURE;
+        status = 1;
     } else {
-        result->rows = rows;
-        result->columns = columns;
+        set_size(rows, columns, result);
         result->matrix = calloc(rows, sizeof(double*));
         for (int row = 0; row < rows; row++) {
            result->matrix[row] = calloc(columns, sizeof(double));
@@ -62,19 +62,39 @@ void s21_remove_matrix(matrix_t *A) {
 
 int s21_eq_matrix(matrix_t *A, matrix_t *B) {
     int status = SUCCESS;
-    double eps = 0.0000001;
-    if (A->rows == B->rows && A->columns == B->columns) {
+    if (incorrect_matrix(A) || incorrect_matrix(B)) status = FAILURE;
+    if (equal_matrix_size(A, B)) {
         for (int row = 0; row < A->rows; row++) {
             for (int column = 0; column < A->columns; column++) {
-                if (fabs(A->matrix[row][column] - B->matrix[row][column]) < eps) { 
-                } else {
+                if (fabs(A->matrix[row][column] - B->matrix[row][column]) >= PRECISION) {
                     status = FAILURE;
-                    break; 
+                    break;
                 }
             }
         }
     } else {
         status = FAILURE;
+    }
+    return status;
+}
+
+void set_size(int rows, int columns, matrix_t *A) {
+    A->rows = rows;
+    A->columns = columns;
+}
+
+int s21_sum_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A) || incorrect_matrix(B)) status = INCORRECT_MTRX;
+    if (equal_matrix_size(A, B)) {
+        s21_create_matrix(A->rows, A->columns, result);
+        for (int row = 0; row < A->rows; row++) {
+            for (int column = 0; column < A->columns; column++) {
+               result->matrix[row][column] = A->matrix[row][column] + B->matrix[row][column];
+            }
+        }
+    } else {
+        status = CALC_ERROR;
     }
     return status;
 }
