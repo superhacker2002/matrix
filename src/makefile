@@ -31,7 +31,7 @@ s21_matrix.a: $(OBJ)
 test:
 	$(CC) $(CFLAGS) -g $(SRC) $(SPRINTF_SRC) $(SRC_TEST) -o all_tests $(LIB_FLAGS) --coverage
 	@echo "---------------------------TESTS--------------------------------------"
-	./$(TEST)
+	@./$(TEST)
 	@echo "----------------------------------------------------------------------"
 
 gcov_report: test 

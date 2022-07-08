@@ -1,13 +1,13 @@
 #include "s21_matrix.h"
 
-// void s21_print_matrix(matrix_t A) {
-//     for (int row = 0; row < A.rows; row++) {
-//         for (int column = 0; column < A.columns; column++) {
-//             printf("%.10lf ", A.matrix[row][column]);
-//         }
-//         printf("\n");
-//     }
-// }
+void s21_print_matrix(matrix_t A) {
+    for (int row = 0; row < A.rows; row++) {
+        for (int column = 0; column < A.columns; column++) {
+            printf("%.10lf ", A.matrix[row][column]);
+        }
+        printf("\n");
+    }
+}
 
 void matrix_struct_init(matrix_t *A) {
     A->rows = 0;
@@ -62,8 +62,9 @@ void s21_remove_matrix(matrix_t *A) {
 
 int s21_eq_matrix(matrix_t *A, matrix_t *B) {
     int status = SUCCESS;
-    if (incorrect_matrix(A) || incorrect_matrix(B)) status = FAILURE;
-    if (equal_matrix_size(A, B)) {
+    if (incorrect_matrix(A) || incorrect_matrix(B)){
+        status = FAILURE;
+    } else if (equal_matrix_size(A, B)) {
         for (int row = 0; row < A->rows; row++) {
             for (int column = 0; column < A->columns; column++) {
                 if (fabs(A->matrix[row][column] - B->matrix[row][column]) >= PRECISION) {
@@ -85,8 +86,9 @@ void set_size(int rows, int columns, matrix_t *A) {
 
 int s21_sum_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
     int status = OK;
-    if (incorrect_matrix(A) || incorrect_matrix(B)) status = INCORRECT_MTRX;
-    if (equal_matrix_size(A, B)) {
+    if (incorrect_matrix(A) || incorrect_matrix(B)) {
+        status = INCORRECT_MTRX;
+    } else if (equal_matrix_size(A, B)) {
         s21_create_matrix(A->rows, A->columns, result);
         for (int row = 0; row < A->rows; row++) {
             for (int column = 0; column < A->columns; column++) {
@@ -98,3 +100,71 @@ int s21_sum_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
     }
     return status;
 }
+
+int s21_sub_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A) || incorrect_matrix(B)) {
+        status = INCORRECT_MTRX;
+    } else if (equal_matrix_size(A, B)) {
+        s21_create_matrix(A->rows, A->columns, result);
+        for (int row = 0; row < A->rows; row++) {
+            for (int column = 0; column < A->columns; column++) {
+               result->matrix[row][column] = A->matrix[row][column] - B->matrix[row][column];
+            }
+        }
+    } else {
+        status = CALC_ERROR;
+    }
+    return status;   
+}
+
+int s21_mult_number(matrix_t *A, double number, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A)) {
+        status = INCORRECT_MTRX;
+    } else {
+        s21_create_matrix(A->rows, A->columns, result);
+        for (int row = 0; row < A->rows; row++) {
+            for (int column = 0; column < A->columns; column++) {
+               result->matrix[row][column] = A->matrix[row][column] * number;
+            }
+        }
+    }
+    return status;
+}
+
+// умножить кадую строку первой матрицы на каждый столбец второй
+int s21_mult_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A) || incorrect_matrix(B)) {
+        status = INCORRECT_MTRX;
+    } else if (A->columns == B->rows) {
+        s21_create_matrix(A->rows, B->columns, result);
+        for (int row = 0; row < result->rows; row++) {
+            for (int column = 0; column < result->columns; column++) {
+                result->matrix[row][column] = 0;
+                for (int k = 0; k < A->columns; k++) {
+                    result->matrix[row][column] += A->matrix[row][k] * B->matrix[k][column];
+                }
+            }
+        }
+    } else {
+        status = CALC_ERROR;
+    }
+    return status;
+}
+
+
+// int main() {
+//     matrix_t s21_matrix;
+//     matrix_t s21_matrix_2;
+//     matrix_t result;
+//     s21_create_matrix(2, 2, &s21_matrix);
+//     s21_create_matrix(2, 3, &s21_matrix_2);
+//     printf("first\n");
+//     s21_fill_matrix(&s21_matrix, 1.0);
+//     printf("second\n");
+//     s21_fill_matrix(&s21_matrix_2, 1.0);
+//     s21_mult_matrix(&s21_matrix, &s21_matrix_2, &result);
+//     s21_print_matrix(result);
+// }
