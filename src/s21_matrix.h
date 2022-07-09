@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #define SUCCESS 1
 #define FAILURE 0
 #define PRECISION 1e-7
@@ -32,5 +33,9 @@ void matrix_struct_init(matrix_t *A);
 int s21_sum_matrix(matrix_t *A, matrix_t *B, matrix_t *result);
 int s21_mult_number(matrix_t *A, double number, matrix_t *result);
 int s21_mult_matrix(matrix_t *A, matrix_t *B, matrix_t *result);
+int s21_transpose(matrix_t *A, matrix_t *result);
+void s21_fill_matrix_scanf(matrix_t *A);
+int s21_sub_matrix(matrix_t *A, matrix_t *B, matrix_t *result);
+void s21_fill_matrix_random(matrix_t *A);
 
 #endif  // SRC_S21_MATRIX_H_

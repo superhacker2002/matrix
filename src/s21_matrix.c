@@ -23,6 +23,14 @@ void s21_fill_matrix(matrix_t *A, double value) {
     }
 }
 
+void s21_fill_matrix_scanf(matrix_t *A) {
+    for (int row = 0; row < A->rows; row++) {
+        for (int column = 0; column < A->columns; column++) {
+            scanf("%lf", &A->matrix[row][column]);
+        }
+    }
+}
+
 int incorrect_matrix(matrix_t *A) {
     int status = 0;
     if (A->rows <= 0 || A->columns <= 0 || A->matrix == NULL) {
@@ -62,7 +70,7 @@ void s21_remove_matrix(matrix_t *A) {
 
 int s21_eq_matrix(matrix_t *A, matrix_t *B) {
     int status = SUCCESS;
-    if (incorrect_matrix(A) || incorrect_matrix(B)){
+    if (incorrect_matrix(A) || incorrect_matrix(B)) {
         status = FAILURE;
     } else if (equal_matrix_size(A, B)) {
         for (int row = 0; row < A->rows; row++) {
@@ -115,7 +123,7 @@ int s21_sub_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
     } else {
         status = CALC_ERROR;
     }
-    return status;   
+    return status;
 }
 
 int s21_mult_number(matrix_t *A, double number, matrix_t *result) {
@@ -133,7 +141,6 @@ int s21_mult_number(matrix_t *A, double number, matrix_t *result) {
     return status;
 }
 
-// умножить кадую строку первой матрицы на каждый столбец второй
 int s21_mult_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
     int status = OK;
     if (incorrect_matrix(A) || incorrect_matrix(B)) {
@@ -154,17 +161,43 @@ int s21_mult_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
     return status;
 }
 
+int s21_transpose(matrix_t *A, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A)) {
+        status = INCORRECT_MTRX;
+    } else {
+        s21_create_matrix(A->columns,  A->rows, result);
+        for (int row = 0; row < A->columns; row++) {
+            for (int column = 0; column < A->rows; column++) {
+                result->matrix[row][column] = A->matrix[column][row];
+            }
+        }
+    }
+    return status;
+}
+
+void s21_fill_matrix_random(matrix_t *A) {
+    srand(time(NULL));
+    for (int row = 0; row < A->rows; row++) {
+        for (int column = 0; column < A->columns; column++) {
+            A->matrix[row][column] = (double)(randgi() % 10);
+        }
+    }
+}
+
 
 // int main() {
 //     matrix_t s21_matrix;
 //     matrix_t s21_matrix_2;
 //     matrix_t result;
 //     s21_create_matrix(2, 2, &s21_matrix);
-//     s21_create_matrix(2, 3, &s21_matrix_2);
+//     s21_create_matrix(3, 2, &s21_matrix_2);
 //     printf("first\n");
 //     s21_fill_matrix(&s21_matrix, 1.0);
 //     printf("second\n");
-//     s21_fill_matrix(&s21_matrix_2, 1.0);
-//     s21_mult_matrix(&s21_matrix, &s21_matrix_2, &result);
+//     s21_fill_matrix_scanf(&s21_matrix_2);
+//     // s21_mult_matrix(&s21_matrix, &s21_matrix_2, &result);
+//     s21_transpose(&s21_matrix_2, &result);
+
 //     s21_print_matrix(result);
 // }
