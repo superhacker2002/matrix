@@ -180,13 +180,43 @@ void s21_fill_matrix_random(matrix_t *A) {
     srand(time(NULL));
     for (int row = 0; row < A->rows; row++) {
         for (int column = 0; column < A->columns; column++) {
-            A->matrix[row][column] = (double)(randgi() % 10);
+            A->matrix[row][column] = (double)(rand () % 10);
+        }
+    }
+}
+
+int s21_calc_complements(matrix_t *A, matrix_t *result) {
+    int status = OK;
+    double matrix_minor = 0;
+    matrix_t determinant;
+    if (incorrect_matrix(A)) {
+        status = INCORRECT_MTRX;
+    } else {
+        for (int row = 0; row < A->rows; row++) {
+            for (int column = 0; column < A->columns; column++) {
+                s21_create_matrix(A->rows - 1, A->columns - 1, &determinant);
+
+            }
+        }
+    }
+    return status;
+}
+
+void fill_determinant(matrix_t *determinant, int deleted_row, int deleted_column, matrix_t *prev_matrix) {
+    int row_new = 0, col_new = 0;
+    for (int row = 0; row < prev_matrix->rows; row++) {
+        if (row == deleted_row) row++;
+        for (int column = 0; column < prev_matrix->columns; column++) {
+            if (column == deleted_column) column++;
+            determinant->matrix[row_new][col_new] = prev_matrix->matrix[row][column];
+            row_new++;
+            col_new++;
         }
     }
 }
 
 
-// int main() {
+int main() {
 //     matrix_t s21_matrix;
 //     matrix_t s21_matrix_2;
 //     matrix_t result;
@@ -200,4 +230,12 @@ void s21_fill_matrix_random(matrix_t *A) {
 //     s21_transpose(&s21_matrix_2, &result);
 
 //     s21_print_matrix(result);
-// }
+
+    matrix_t A;
+    matrix_t det;
+    s21_create_matrix(5, 5, &A);
+    s21_fill_matrix_random(&A);
+    s21_print_matrix(A);
+    fill_determinant(&det, 0, 0, &A);
+    s21_print_matrix(det);
+}
