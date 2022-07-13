@@ -38,5 +38,5 @@ void s21_fill_matrix_scanf(matrix_t *A);
 int s21_sub_matrix(matrix_t *A, matrix_t *B, matrix_t *result);
 void s21_fill_matrix_random(matrix_t *A);
 void fill_determinant(matrix_t *determinant, int deleted_row, int deleted_column, matrix_t *prev_matrix);
-
+double find_det_matrix_2x2(matrix_t*determinant);
 #endif  // SRC_S21_MATRIX_H_

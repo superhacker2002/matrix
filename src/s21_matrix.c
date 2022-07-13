@@ -195,6 +195,7 @@ int s21_calc_complements(matrix_t *A, matrix_t *result) {
         for (int row = 0; row < A->rows; row++) {
             for (int column = 0; column < A->columns; column++) {
                 s21_create_matrix(A->rows - 1, A->columns - 1, &determinant);
+                fill_determinant(&determinant, row, column, A);
 
             }
         }
@@ -204,15 +205,26 @@ int s21_calc_complements(matrix_t *A, matrix_t *result) {
 
 void fill_determinant(matrix_t *determinant, int deleted_row, int deleted_column, matrix_t *prev_matrix) {
     int row_new = 0, col_new = 0;
+    double determinant_num = 0;
     for (int row = 0; row < prev_matrix->rows; row++) {
         if (row == deleted_row) row++;
+        col_new = 0;
         for (int column = 0; column < prev_matrix->columns; column++) {
             if (column == deleted_column) column++;
-            determinant->matrix[row_new][col_new] = prev_matrix->matrix[row][column];
-            row_new++;
-            col_new++;
+            determinant->matrix[row_new][col_new++] = prev_matrix->matrix[row][column];
         }
+        row_new++;
     }
+    if (row_new == 2) {
+        determinant_num = find_det_matrix_2x2(determinant);
+    } else if (row_new == 3) {
+        
+    }
+}
+
+double find_det_matrix_2x2(matrix_t *determinant) {
+    return determinant->matrix[0][0] * determinant->matrix[1][1] -
+            determinant->matrix[0][1] * determinant->matrix[1][0];
 }
 
 
@@ -234,8 +246,11 @@ int main() {
     matrix_t A;
     matrix_t det;
     s21_create_matrix(5, 5, &A);
+
+    s21_create_matrix(4, 4, &det);
     s21_fill_matrix_random(&A);
     s21_print_matrix(A);
-    fill_determinant(&det, 0, 0, &A);
+    printf("---------------------\n");
+    fill_determinant(&det, 1, 2, &A);
     s21_print_matrix(det);
 }
