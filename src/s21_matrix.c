@@ -1,56 +1,9 @@
 #include "s21_matrix.h"
 
-void s21_print_matrix(matrix_t A) {
-    for (int row = 0; row < A.rows; row++) {
-        for (int column = 0; column < A.columns; column++) {
-            printf("%.10lf ", A.matrix[row][column]);
-        }
-        printf("\n");
-    }
-}
-
-void matrix_struct_init(matrix_t *A) {
-    A->rows = 0;
-    A->columns = 0;
-    A->matrix = NULL;
-}
-
-void s21_fill_matrix(matrix_t *A, double value) {
-    for (int row = 0; row < A->rows; row++) {
-        for (int column = 0; column < A->columns; column++) {
-            A->matrix[row][column] = value;
-        }
-    }
-}
-
-void s21_fill_matrix_scanf(matrix_t *A) {
-    for (int row = 0; row < A->rows; row++) {
-        for (int column = 0; column < A->columns; column++) {
-            scanf("%lf", &A->matrix[row][column]);
-        }
-    }
-}
-
-int incorrect_matrix(matrix_t *A) {
-    int status = 0;
-    if (A->rows <= 0 || A->columns <= 0 || A->matrix == NULL) {
-        status = 1;
-    }
-    return status;
-}
-
-int equal_matrix_size(matrix_t *A, matrix_t *B) {
-    int status = 0;
-    if (A->rows == B->rows && A->columns == B->columns) {
-        status = 1;
-    }
-    return status;
-}
-
 int s21_create_matrix(int rows, int columns, matrix_t *result) {
-    int status = 0;
-    if (rows <= 0 && columns <= 0) {
-        status = 1;
+    int status = OK;
+    if (rows <= 0 || columns <= 0) {
+        status = INCORRECT_MTRX;
     } else {
         set_size(rows, columns, result);
         result->matrix = calloc(rows, sizeof(double*));
@@ -62,10 +15,12 @@ int s21_create_matrix(int rows, int columns, matrix_t *result) {
 }
 
 void s21_remove_matrix(matrix_t *A) {
-    for (int row = 0; row < A->rows; row++) {
-        free(A->matrix[row]);
+    if (A && A->matrix) {
+        for (int row = 0; row < A->rows; row++) {
+            free(A->matrix[row]);
+        }
+        free(A->matrix);
     }
-    free(A->matrix);
 }
 
 int s21_eq_matrix(matrix_t *A, matrix_t *B) {
@@ -85,11 +40,6 @@ int s21_eq_matrix(matrix_t *A, matrix_t *B) {
         status = FAILURE;
     }
     return status;
-}
-
-void set_size(int rows, int columns, matrix_t *A) {
-    A->rows = rows;
-    A->columns = columns;
 }
 
 int s21_sum_matrix(matrix_t *A, matrix_t *B, matrix_t *result) {
@@ -176,6 +126,115 @@ int s21_transpose(matrix_t *A, matrix_t *result) {
     return status;
 }
 
+int s21_calc_complements(matrix_t *A, matrix_t *result) {
+    int status = OK;
+    matrix_t minor;
+    if (incorrect_matrix(A)) {
+        status = INCORRECT_MTRX;
+    } else if (A->rows != A->columns) {
+        status = CALC_ERROR;
+    } else {
+        double determinant = 0;
+        s21_create_matrix(A->rows, A->columns, result);
+        for (int row = 0; row < A->rows; row++) {
+            for (int column = 0; column < A->columns; column++) {
+                s21_create_matrix(A->rows - 1, A->columns - 1, &minor);
+                s21_fill_minor_matrix(A, row, column, &minor);
+                s21_determinant(&minor, &determinant);
+                result->matrix[row][column] = pow(-1, row + column) * determinant;
+                s21_remove_matrix(&minor);
+            }
+        }
+    }
+    return status;
+}
+
+int s21_determinant(matrix_t *A, double *result) {
+    int status = OK;
+    if (incorrect_matrix(A) || A->columns != A->rows) {
+        status = INCORRECT_MTRX;
+    } else {
+        *result = 0;
+        if (A->rows == 1) {
+            *result  = A->matrix[0][0];
+        } else if (A->rows == 2) {
+            *result  = find_det_matrix_2x2(A);
+        } else {
+            matrix_t minor;
+            minor.matrix = NULL;
+            s21_create_matrix(A->rows -1, A->columns - 1, &minor);
+            for (int i = 0; i < A->columns; i++) {
+                double tmp = 0;
+                s21_fill_minor_matrix(A, 0, i, &minor);
+                s21_determinant(&minor, &tmp);
+                tmp = pow(-1, i + 2) * tmp;
+                *result += (A->matrix[0][i]) * tmp;
+            }
+            s21_remove_matrix(&minor);
+        }
+    }
+    return status;
+}
+
+int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
+    int status = OK;
+    if (incorrect_matrix(A)) {
+        status = INCORRECT_MTRX;
+    } else if (A->rows != A->columns) {
+        status = CALC_ERROR;
+    } else {
+        double determinant = 0;
+        matrix_t transposed_A;
+        matrix_t complements_transposed;
+        s21_determinant(A, &determinant);
+        if (fabs(determinant) < EPS) {
+            status = CALC_ERROR;
+        } else {
+            s21_transpose(A, &transposed_A);
+            s21_calc_complements(&transposed_A, &complements_transposed);
+            s21_mult_number(&complements_transposed, 1.0 / determinant, result);
+            s21_remove_matrix(&transposed_A);
+            s21_remove_matrix(&complements_transposed);
+        }
+    }
+    return status;
+}
+
+void matrix_struct_init(matrix_t *A) {
+    A->rows = 0;
+    A->columns = 0;
+    A->matrix = NULL;
+}
+
+void s21_fill_matrix(matrix_t *A, double value) {
+    for (int row = 0; row < A->rows; row++) {
+        for (int column = 0; column < A->columns; column++) {
+            A->matrix[row][column] = value;
+        }
+    }
+}
+
+int incorrect_matrix(matrix_t *A) {
+    int status = 0;
+    if (A->rows <= 0 || A->columns <= 0 || A->matrix == NULL) {
+        status = 1;
+    }
+    return status;
+}
+
+int equal_matrix_size(matrix_t *A, matrix_t *B) {
+    int status = 0;
+    if (A->rows == B->rows && A->columns == B->columns) {
+        status = 1;
+    }
+    return status;
+}
+
+void set_size(int rows, int columns, matrix_t *A) {
+    A->rows = rows;
+    A->columns = columns;
+}
+
 void s21_fill_matrix_random(matrix_t *A) {
     srand(time(NULL));
     for (int row = 0; row < A->rows; row++) {
@@ -185,40 +244,18 @@ void s21_fill_matrix_random(matrix_t *A) {
     }
 }
 
-int s21_calc_complements(matrix_t *A, matrix_t *result) {
-    int status = OK;
-    double matrix_minor = 0;
-    matrix_t determinant;
-    if (incorrect_matrix(A)) {
-        status = INCORRECT_MTRX;
-    } else {
-        for (int row = 0; row < A->rows; row++) {
-            for (int column = 0; column < A->columns; column++) {
-                s21_create_matrix(A->rows - 1, A->columns - 1, &determinant);
-                fill_determinant(&determinant, row, column, A);
-
+void s21_fill_minor_matrix(matrix_t *A, int deleted_row, int deleted_col, matrix_t *minor) {
+    if (minor->matrix != NULL) {
+        for (int row = 0, row_small = 0; row < A->rows; row++) {
+            if (row != deleted_row) {
+                for (int col = 0, col_small = 0; col < A->columns; col++) {
+                    if (col != deleted_col) {
+                       minor->matrix[row_small][col_small++] = A->matrix[row][col];
+                    }
+                }
+                row_small++;
             }
         }
-    }
-    return status;
-}
-
-void fill_determinant(matrix_t *determinant, int deleted_row, int deleted_column, matrix_t *prev_matrix) {
-    int row_new = 0, col_new = 0;
-    double determinant_num = 0;
-    for (int row = 0; row < prev_matrix->rows; row++) {
-        if (row == deleted_row) row++;
-        col_new = 0;
-        for (int column = 0; column < prev_matrix->columns; column++) {
-            if (column == deleted_column) column++;
-            determinant->matrix[row_new][col_new++] = prev_matrix->matrix[row][column];
-        }
-        row_new++;
-    }
-    if (row_new == 2) {
-        determinant_num = find_det_matrix_2x2(determinant);
-    } else if (row_new == 3) {
-        
     }
 }
 
@@ -228,29 +265,4 @@ double find_det_matrix_2x2(matrix_t *determinant) {
 }
 
 
-int main() {
-//     matrix_t s21_matrix;
-//     matrix_t s21_matrix_2;
-//     matrix_t result;
-//     s21_create_matrix(2, 2, &s21_matrix);
-//     s21_create_matrix(3, 2, &s21_matrix_2);
-//     printf("first\n");
-//     s21_fill_matrix(&s21_matrix, 1.0);
-//     printf("second\n");
-//     s21_fill_matrix_scanf(&s21_matrix_2);
-//     // s21_mult_matrix(&s21_matrix, &s21_matrix_2, &result);
-//     s21_transpose(&s21_matrix_2, &result);
 
-//     s21_print_matrix(result);
-
-    matrix_t A;
-    matrix_t det;
-    s21_create_matrix(5, 5, &A);
-
-    s21_create_matrix(4, 4, &det);
-    s21_fill_matrix_random(&A);
-    s21_print_matrix(A);
-    printf("---------------------\n");
-    fill_determinant(&det, 1, 2, &A);
-    s21_print_matrix(det);
-}

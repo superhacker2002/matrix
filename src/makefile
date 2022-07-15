@@ -7,15 +7,15 @@ COVER_GCNO = $(patsubst %.o, %.gcno, $(OBJ) $(OBJ_TEST))
 COVER_GCDA = $(patsubst %.o, %.gcda, $(OBJ) $(OBJ_TEST))
 CC = gcc
 SRC = s21_matrix.c	
-SRC_TEST = s21_matrix_tests.c
+SRC_TEST = s21_matrix_test.c
 CFLAGS := -Wall -Werror -Wextra -std=c11
 LINUX_FLAGS = -lsubunit -lrt -lpthread -lm
 LIB_FLAGS = -lcheck
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S), Linux)
-	LIB_FLAGS += $(LINUX_FLAGS)
-endif
+# UNAME_S := $(shell uname -s)
+# ifeq ($(UNAME_S), Linux)
+# 	LIB_FLAGS += $(LINUX_FLAGS)
+# endif
 
 .PHONY: all, clean, test, s21_matrix.a, gcov_report
 
@@ -51,3 +51,6 @@ check:
 clean:
 	@rm -rf $(OBJ) $(COVER_GCNO) $(OBJ_TEST) $(COVER_GCDA) s21_matrix.a *.info *.cfg
 	@rm -rf $(TEST) report
+
+valgrind:
+	CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ./all_tests
