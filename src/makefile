@@ -29,7 +29,7 @@ s21_matrix.a: $(OBJ)
 	$(CC) $(СFLAGS) -c $< -o $@ $(LIB_FLAGS)
 
 test:
-	$(CC) $(CFLAGS) -g $(SRC) $(SPRINTF_SRC) $(SRC_TEST) -o all_tests $(LIB_FLAGS) --coverage
+	$(CC) $(CFLAGS) $(SRC) $(SPRINTF_SRC) $(SRC_TEST) -o all_tests $(LIB_FLAGS) --coverage
 	@echo "---------------------------TESTS--------------------------------------"
 	@./$(TEST)
 	@echo "----------------------------------------------------------------------"

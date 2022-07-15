@@ -200,20 +200,6 @@ int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
     return status;
 }
 
-void matrix_struct_init(matrix_t *A) {
-    A->rows = 0;
-    A->columns = 0;
-    A->matrix = NULL;
-}
-
-void s21_fill_matrix(matrix_t *A, double value) {
-    for (int row = 0; row < A->rows; row++) {
-        for (int column = 0; column < A->columns; column++) {
-            A->matrix[row][column] = value;
-        }
-    }
-}
-
 int incorrect_matrix(matrix_t *A) {
     int status = 0;
     if (A->rows <= 0 || A->columns <= 0 || A->matrix == NULL) {
@@ -233,15 +219,6 @@ int equal_matrix_size(matrix_t *A, matrix_t *B) {
 void set_size(int rows, int columns, matrix_t *A) {
     A->rows = rows;
     A->columns = columns;
-}
-
-void s21_fill_matrix_random(matrix_t *A) {
-    srand(time(NULL));
-    for (int row = 0; row < A->rows; row++) {
-        for (int column = 0; column < A->columns; column++) {
-            A->matrix[row][column] = (double)(rand () % 10);
-        }
-    }
 }
 
 void s21_fill_minor_matrix(matrix_t *A, int deleted_row, int deleted_col, matrix_t *minor) {
